@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Asesmen SDN 1 Gondang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --secondary-blue: #93c5fd;
+            --accent-green: #10b981;
+            --bg-gray: #f3f4f6;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 850px;
+            background-color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 24px;
+            }
+        }
+
+        .font-sahabat {
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.1em;
+            background: linear-gradient(to bottom, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3));
+        }
+
+        .btn-masuk {
+            background-color: var(--accent-green);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-masuk:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-nav {
+            background-color: var(--primary-blue);
+            border-radius: 12px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .selected-option {
+            background-color: #dbeafe !important;
+            border-color: #3b82f6 !important;
+            transform: translateX(8px);
+        }
+
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+        }
+
+        .input-field {
+            background-color: #ffffff;
+            color: #1e293b;
+            text-align: center;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container p-6" id="app">
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-14 w-14 border-4 border-blue-400 border-t-transparent mb-4"></div>
+        <p class="font-bold text-lg">Memproses Data...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex flex-col items-center justify-center h-full">
+        <div class="mb-6">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUAgnz3M-C0b4aP4NCccOVpRTBjimetBgZhyphenhyphenkGcMIcG3YY7RhacnjOZFFonylLQGbQ0LQHR7n4cOk7XN8mDb9YmRrXgJi5q7yZCEEKpQ4CYuB9WaZLCNw35_qVPvcRTizOMvZXsYVqmAOSfxDv9bUmpB9z_-2G3ecR_C1CONgsQ5-5U5NA2B9rpU4zfJnZ/w200-h200/sdn%20gng%201.png" alt="Logo SDN 1 Gondang" class="w-28 h-28 object-contain">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight uppercase">Selamat Datang</h1>
+            <h2 class="text-5xl font-black mb-2 font-sahabat uppercase">Sahabat</h2>
+            <p class="text-[10px] text-gray-600 font-medium tracking-widest uppercase text-center">
+                Sistem Asesmen Hasil Amanah Berprestasi Akurat & Terpercaya
+            </p>
+        </div>
+
+        <div class="w-full space-y-4">
+            <input type="text" id="name" placeholder="NAMA LENGKAP" class="input-field uppercase">
+            <input type="number" id="absen" placeholder="NOMOR ABSEN" class="input-field">
+            <button onclick="startExam()" class="w-full py-4 mt-2 rounded-xl btn-masuk text-white font-bold text-lg shadow-lg uppercase">
+                Mulai Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Screen -->
+    <div id="exam-screen" class="hidden flex flex-col h-full">
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                Soal <span id="current-number">1</span> / <span id="total-questions">0</span>
+            </span>
+            <span id="timer" class="text-gray-700 font-mono font-bold text-sm">00:00</span>
+        </div>
+        
+        <div class="flex-grow">
+            <div class="bg-blue-50 rounded-2xl p-5 mb-6 border-l-4 border-blue-600">
+                <p id="question-text" class="text-base font-bold text-gray-800 leading-relaxed">Memuat...</p>
+            </div>
+            <div id="options-container" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-between items-center mt-6 pb-4 gap-3">
+            <button onclick="prevQuestion()" id="prev-btn" class="btn-nav flex-1 opacity-50" disabled>KEMBALI</button>
+            <button onclick="handleNext()" class="btn-nav flex-1" id="next-btn">LANJUT</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-2">Selesai?</h3>
+        <p class="text-sm text-gray-600 mb-6">Pastikan semua jawaban sudah terisi.</p>
+        <div class="flex gap-3">
+            <button onclick="hideConfirm()" class="flex-1 py-3 border border-gray-300 rounded-xl font-bold text-gray-500">BATAL</button>
+            <button onclick="finishExam()" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">KIRIM</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz1sq6Ks2rC3lIdcA3i9TRLPebUdny0st73zmcZXI7HVVSZ63hxJWsz3_rVOH3L0gdO/exec'; 
+
+    const questions = [
+{ 
+    id: 1, 
+    text: "Pacelathon asale saka tembung lingga 'celathu' sing tegese ....", 
+    options: [{id:'A', text:'Maca'}, {id:'B', text:'Nulis'}, {id:'C', text:'Omongan/Guneman'}, {id:'D', text:'Nembang'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 2, 
+    text: "Pacelathon yaiku guneman antarane wong ... utawa luwih.", 
+    options: [{id:'A', text:'Siji'}, {id:'B', text:'Loro'}, {id:'C', text:'Dewean'}, {id:'D', text:'Meneng-menengan'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 3, 
+    text: "Nalika nindakake pacelathon karo wong sing luwih tuwa, awake dhewe kudu nggunakake basa ....", 
+    options: [{id:'A', text:'Ngoko Lugu'}, {id:'B', text:'Ngoko Alus'}, {id:'C', text:'Krama Alus/Inggil'}, {id:'D', text:'Basa Indonesia'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 4, 
+    text: "Sing dadi ciri khas panulise teks pacelathon yaiku nggunakake tanda ....", 
+    options: [{id:'A', text:'Petik loro ("...")'}, {id:'B', text:'Titik (.)'}, {id:'C', text:'Koma (,)'}, {id:'D', text:'Kurung ( )'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 5, 
+    text: "Basa Ngoko Lugu biasane digunakake kanggo pacelathon antarane ....", 
+    options: [{id:'A', text:'Anak marang Bapak'}, {id:'B', text:'Murid marang Guru'}, {id:'C', text:'Kanca padha kanca sing wis akrab'}, {id:'D', text:'Putu marang Simbah'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 6, 
+    text: "Supaya bisa mangerteni isine pacelathon, sing sepisanan kudu ditindakake yaiku ....", 
+    options: [{id:'A', text:'Mlayu-mlayu'}, {id:'B', text:'Nyemak kanthi titi'}, {id:'C', text:'Nulis layang'}, {id:'D', text:'Turu'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 7, 
+    text: "Ing teks pacelathon, jenenge paraga (tokoh) ditulis ing ....", 
+    options: [{id:'A', text:'Mburine guneman'}, {id:'B', text:'Njerone guneman'}, {id:'C', text:'Ngarep dhewe sadurunge guneman'}, {id:'D', text:'Ing ngisor dhewe'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 8, 
+    text: "Unggah-ungguh basa sing digunakake wong tuwa marang anak nggunakake basa ....", 
+    options: [{id:'A', text:'Krama Alus'}, {id:'B', text:'Krama Lugu'}, {id:'C', text:'Ngoko Lugu'}, {id:'D', text:'Krama Inggil'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 9, 
+    text: "Latar mawa kahanan ing teks pacelathon biasane ditulis nggunakake tanda ....", 
+    options: [{id:'A', text:'Seru'}, {id:'B', text:'Tanya'}, {id:'C', text:'Kurung ( )'}, {id:'D', text:'Persen'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 10, 
+    text: "Isine pacelathon kuwi kudu ... supaya sing krungu ora salah paham.", 
+    options: [{id:'A', text:'Dawa banget'}, {id:'B', text:'Cekak aos/jelas'}, {id:'C', text:'Ruwed'}, {id:'D', text:'Nganggo basa manca'}], 
+    correct: 'B' 
+  },
+
+  // --- MRAGAKAKE LAN NYRITAKAKE PACELATHON (11-20) ---
+  { 
+    id: 11, 
+    text: "Nalika mragakake pacelathon, polahe awak kudu luwes utawa diarani ....", 
+    options: [{id:'A', text:'Wicara'}, {id:'B', text:'Wiraga'}, {id:'C', text:'Wirama'}, {id:'D', text:'Wirasa'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 12, 
+    text: "Swara banter lirih lan dhuwur cendhake nalika mragakake pacelathon diarani ....", 
+    options: [{id:'A', text:'Mimik'}, {id:'B', text:'Ekspresi'}, {id:'C', text:'Intonasi/Wirama'}, {id:'D', text:'Blocking'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 13, 
+    text: "Obah mosike praupan (wajah) kanggo nuduhake rasa seneng utawa sedhih diarani ....", 
+    options: [{id:'A', text:'Intonasi'}, {id:'B', text:'Mimik/Ekspresi'}, {id:'C', text:'Gaya bahasa'}, {id:'D', text:'Diksi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 14, 
+    text: "Nyritakake isine pacelathon kuwi ateges ngowahi teks pacelathon dadi wujud ....", 
+    options: [{id:'A', text:'Geguritan'}, {id:'B', text:'Tembang'}, {id:'C', text:'Gancaran (cerita/prosa)'}, {id:'D', text:'Parikan'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 15, 
+    text: "Langkah kapisan kanggo nulis teks pacelathon yaiku nemtokake ....", 
+    options: [{id:'A', text:'Judul'}, {id:'B', text:'Paraga'}, {id:'C', text:'Tema'}, {id:'D', text:'Papan panggonan'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 16, 
+    text: "Nalika matur marang Ibu Guru babagan ijin ora mlebu sekolah, becike nggunakake basa ....", 
+    options: [{id:'A', text:'Ngoko'}, {id:'B', text:'Krama'}, {id:'C', text:'Inggris'}, {id:'D', text:'Jawa Timuran'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 17, 
+    text: "Sing dudu tata krama nalika pacelathon yaiku ....", 
+    options: [{id:'A', text:'Nyawang wong sing diajak guneman'}, {id:'B', text:'Ngomong nggunakake basa sing sopan'}, {id:'C', text:'Nyelat gunemane wong liya sadurunge rampung'}, {id:'D', text:'Rungokake kanthi titi'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 18, 
+    text: "Ing teks pacelathon, keterangan panggonan lan kahanan diarani ....", 
+    options: [{id:'A', text:'Alur'}, {id:'B', text:'Setting/Latar'}, {id:'C', text:'Amanat'}, {id:'D', text:'Konflik'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 19, 
+    text: "Yen awake dhewe salah marang kanca, nalika pacelathon kudu nggunakake ukara ....", 
+    options: [{id:'A', text:'Njaluk tulung'}, {id:'B', text:'Njaluk ngapura'}, {id:'C', text:'Parentah'}, {id:'D', text:'Panyandra'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 20, 
+    text: "Mragakake pacelathon ing ngarep kelas kudu nggunakake swara sing ....", 
+    options: [{id:'A', text:'Grogol'}, {id:'B', text:'Cetho lan keprungu'}, {id:'C', text:'Groyok'}, {id:'D', text:'Lirih banget'}], 
+    correct: 'B' 
+  },
+
+  // --- PENGERTIAN LAN NYEMAK GEGURITAN (21-30) ---
+  { 
+    id: 21, 
+    text: "Geguritan yaiku salah sawijining karya sastra Jawa sing awujud ....", 
+    options: [{id:'A', text:'Cerita dawa'}, {id:'B', text:'Puisi'}, {id:'C', text:'Drama'}, {id:'D', text:'Wayang'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 22, 
+    text: "Geguritan gagrag anyar iku ora kaiket dening ....", 
+    options: [{id:'A', text:'Tema'}, {id:'B', text:'Guru gatra lan guru lagu'}, {id:'C', text:'Pangrasa'}, {id:'D', text:'Tembung'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 23, 
+    text: "Wong sing nulis geguritan diarani ....", 
+    options: [{id:'A', text:'Dhalang'}, {id:'B', text:'Panggurit'}, {id:'C', text:'Narasumber'}, {id:'D', text:'Panyandra'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 24, 
+    text: "Geguritan gagrag lawas biasane diwiwiti kanthi ukara ....", 
+    options: [{id:'A', text:'Sepisanan'}, {id:'B', text:'Sun gegurit'}, {id:'C', text:'Ana crita'}, {id:'D', text:'Kala semono'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 25, 
+    text: "Pamilihing tembung sing mentes lan endah ing geguritan diarani ....", 
+    options: [{id:'A', text:'Diksi'}, {id:'B', text:'Alur'}, {id:'C', text:'Latar'}, {id:'D', text:'Bait'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 26, 
+    text: "Geguritan iku nduweni struktur 'Bait'. Ing basa Jawa bait diarani ....", 
+    options: [{id:'A', text:'Gatra'}, {id:'B', text:'Pada'}, {id:'C', text:'Wanda'}, {id:'D', text:'Swara'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 27, 
+    text: "Saben sak larik ing geguritan diarani ....", 
+    options: [{id:'A', text:'Pada'}, {id:'B', text:'Gatra'}, {id:'C', text:'Pupuh'}, {id:'D', text:'Paragraf'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 28, 
+    text: "Tujuane panggurit nulis geguritan yaiku kanggo ....", 
+    options: [{id:'A', text:'Pamer kapinteran'}, {id:'B', text:'Nuduhake rasa pangrasa lan pesen'}, {id:'C', text:'Golek dhuwit'}, {id:'D', text:'Ngisi wektu selo'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 29, 
+    text: "Nalika nyemak geguritan, awake dhewe kudu nggatekake ... supaya mudheng isine.", 
+    options: [{id:'A', text:'Wernane dluwang'}, {id:'B', text:'Pangertene tembung-tembung sing angel'}, {id:'C', text:'Jenenge panggurit wae'}, {id:'D', text:'Cacahe gatra'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 30, 
+    text: "Geguritan sing isine ngenani babagan katresnan diarani geguritan ....", 
+    options: [{id:'A', text:'Sithik'}, {id:'B', text:'Romantis/Tresna asih'}, {id:'C', text:'Perjuangan'}, {id:'D', text:'Kesehatan'}], 
+    correct: 'B' 
+  },
+
+  // --- MACA LAN NGANDARAKE PIWULANG GEGURITAN (31-40) ---
+  { 
+    id: 31, 
+    text: "Maca geguritan iku beda karo maca buku pelajaran, amarga kudu nganggo ....", 
+    options: [{id:'A', text:'Layu'}, {id:'B', text:'Rasa pangrasa/penjiwaan'}, {id:'C', text:'Cepet-cepetan'}, {id:'D', text:'Meneng wae'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 32, 
+    text: "Wicara ing maca geguritan tegese ....", 
+    options: [{id:'A', text:'Obahe awak'}, {id:'B', text:'Artikulasi/pocapan sing cetho'}, {id:'C', text:'Iramane swara'}, {id:'D', text:'Penjiwaan'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 33, 
+    text: "Wirasa nalika maca geguritan tegese ....", 
+    options: [{id:'A', text:'Pocapan'}, {id:'B', text:'Lagu'}, {id:'C', text:'Ngrasakake isine geguritan'}, {id:'D', text:'Maca kanthi banter'}], 
+    correct: 'C' 
+  },
+  { 
+    id: 34, 
+    text: "Piwulang becik sing ana ing njerone geguritan diarani ....", 
+    options: [{id:'A', text:'Tema'}, {id:'B', text:'Amanat'}, {id:'C', text:'Diksi'}, {id:'D', text:'Setting'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 35, 
+    text: "Yen geguritane babagan 'Ibu', piwulang becik sing bisa dijupuk yaiku ....", 
+    options: [{id:'A', text:'Kudu wani marang wong tuwa'}, {id:'B', text:'Kudu bhakti marang wong tuwa'}, {id:'C', text:'Oleh kesed'}, {id:'D', text:'Ora usah sinau'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 36, 
+    text: "Maca geguritan kanthi obahing awak lan mimik praupan sing pas diarani ....", 
+    options: [{id:'A', text:'Deklamasi'}, {id:'B', text:'Diskusi'}, {id:'C', text:'Dikte'}, {id:'D', text:'Dongeng'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 37, 
+    text: "Pasuryan (wajah) nalika maca geguritan bab perjuangan kudu katon ....", 
+    options: [{id:'A', text:'Mesem wae'}, {id:'B', text:'Semangat lan tatag'}, {id:'C', text:'Wedi'}, {id:'D', text:'Nangis'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 38, 
+    text: "Sadurunge maca geguritan ing ngarep wong akeh, becike ....", 
+    options: [{id:'A', text:'Latihan luwih dhisik'}, {id:'B', text:'Langsung maju wae'}, {id:'C', text:'Turu dhisik'}, {id:'D', text:'Ora usah maca'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 39, 
+    text: "Geguritan kanthi tema 'Lingkungan' biasane ngajak awake dhewe supaya ....", 
+    options: [{id:'A', text:'Mbuang sampah sembarangan'}, {id:'B', text:'Njaga karesikan'}, {id:'C', text:'Negori wit-witan'}, {id:'D', text:'Ngrusak taman'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 40, 
+    text: "Maca geguritan kanthi wirama tegese ....", 
+    options: [{id:'A', text:'Nggatekake dhuwur cendhake swara'}, {id:'B', text:'Maca kanthi cepet'}, {id:'C', text:'Obahing sikil'}, {id:'D', text:'Mripat merem'}], 
+    correct: 'A' 
+  },
+
+  // --- NULIS GEGURITAN (41-50) ---
+  { 
+    id: 41, 
+    text: "Nulis geguritan kudu nggunakake tembung-tembung sing ....", 
+    options: [{id:'A', text:'Biasa wae'}, {id:'B', text:'Pilihane endah (pinilih)'}, {id:'C', text:'Angel banget mudhenge'}, {id:'D', text:'Basa gaul'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 42, 
+    text: "Langkah kapisan nulis geguritan yaiku ....", 
+    options: [{id:'A', text:'Nemtokake tema'}, {id:'B', text:'Nulis judul'}, {id:'C', text:'Golek kertas'}, {id:'D', text:'Maca buku'}], 
+    correct: 'A' 
+  },
+  { 
+    id: 43, 
+    text: "Tema 'Sekolahku' cocok kanggo nulis geguritan babagan ....", 
+    options: [{id:'A', text:'Simbah ing desa'}, {id:'B', text:'Panggonan nggolek ilmu'}, {id:'C', text:'Pasar tumpah'}, {id:'D', text:'Wisata menyang pantai'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 44, 
+    text: "Geguritan kang isine ngenani rasa syukur marang Gusti diarani tema ....", 
+    options: [{id:'A', text:'Sosial'}, {id:'B', text:'Religius/Kagamaan'}, {id:'C', text:'Politik'}, {id:'D', text:'Ekonomi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 45, 
+    text: "Nalika nulis geguritan, gagasan pokok dikembangake dadi ....", 
+    options: [{id:'A', text:'Paragraf'}, {id:'B', text:'Ukara-ukara endah ing gatra'}, {id:'C', text:'Pacelathon'}, {id:'D', text:'Dongeng'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 46, 
+    text: "Nulis geguritan iku minangka wadhah kanggo ....", 
+    options: [{id:'A', text:'Nesu-nesu'}, {id:'B', text:'Ngandharake kreativitas'}, {id:'C', text:'Golek musuh'}, {id:'D', text:'Ujian wae'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 47, 
+    text: "Dhuwur cendhake swara nalika maca geguritan diarani ....", 
+    options: [{id:'A', text:'Lafal'}, {id:'B', text:'Intonasi'}, {id:'C', text:'Ekspresi'}, {id:'D', text:'Diksi'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 48, 
+    text: "Ing geguritan, siji 'Pada' biasane kasusun saka pirang-pirang ....", 
+    options: [{id:'A', text:'Buku'}, {id:'B', text:'Gatra (larik)'}, {id:'C', text:'Judul'}, {id:'D', text:'Halaman'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 49, 
+    text: "Geguritan sing apik yaiku sing bisa gawe ... sing maca.", 
+    options: [{id:'A', text:'Ngantuk'}, {id:'B', text:'Kagugah rasane/kesengsem'}, {id:'C', text:'Lara untu'}, {id:'D', text:'Wedi banget'}], 
+    correct: 'B' 
+  },
+  { 
+    id: 50, 
+    text: "Pesen moral ing geguritan asring disebut ....", 
+    options: [{id:'A', text:'Gatra'}, {id:'B', text:'Amanat/Piwulang'}, {id:'C', text:'Wirasa'}, {id:'D', text:'Wicara'}], 
+    correct: 'B' 
+  }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let userData = { name: '', absen: '' };
+    let startTime;
+    let timerInterval;
+
+    function startExam() {
+        userData.name = document.getElementById('name').value.trim();
+        userData.absen = document.getElementById('absen').value.trim();
+
+        if (!userData.name || !userData.absen) {
+            alert("Isi Nama dan Absen!");
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('exam-screen').classList.remove('hidden');
+        document.getElementById('total-questions').innerText = questions.length;
+        
+        startTime = new Date();
+        timerInterval = setInterval(updateTimer, 1000);
+        renderQuestion();
+    }
+
+    function updateTimer() {
+        const diff = Math.floor((new Date() - startTime) / 1000);
+        const m = Math.floor(diff / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('current-number').innerText = currentQuestionIndex + 1;
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach(opt => {
+            const isSelected = userAnswers[currentQuestionIndex] === opt.id;
+            const div = document.createElement('div');
+            div.className = `option-item p-4 rounded-xl font-medium flex items-center shadow-sm ${isSelected ? 'selected-option' : ''}`;
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 text-xs font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}">
+                    ${opt.id}
+                </div>
+                <span class="text-sm">${opt.text}</span>
+            `;
+            div.onclick = () => { 
+                userAnswers[currentQuestionIndex] = opt.id; 
+                renderQuestion(); 
+            };
+            container.appendChild(div);
+        });
+
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+        document.getElementById('prev-btn').style.opacity = currentQuestionIndex === 0 ? '0.5' : '1';
+        document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "SELESAI" : "LANJUT";
+    }
+
+    function handleNext() {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        } else {
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    function hideConfirm() { 
+        document.getElementById('confirm-modal').style.display = 'none'; 
+    }
+
+    async function finishExam() {
+        hideConfirm();
+        clearInterval(timerInterval);
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        let correct = 0;
+        questions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
+        const score = Math.round((correct / questions.length) * 100);
+
+        const payload = new URLSearchParams();
+        payload.append('timestamp', new Date().toLocaleString());
+        payload.append('nama', userData.name);
+        payload.append('absen', userData.absen);
+        payload.append('skor', score);
+        payload.append('durasi', document.getElementById('timer').innerText);
+
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: payload });
+            showResult(score, correct);
+        } catch (e) {
+            showResult(score, correct);
+        } finally {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+    }
+
+    function showResult(score, correct) {
+        document.getElementById('exam-screen').innerHTML = `
+            <div class="flex flex-col items-center justify-center text-center h-full py-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-xl font-black mb-1">UJIAN SELESAI</h1>
+                <p class="text-xs text-gray-500 mb-6">${userData.name} - Absen ${userData.absen}</p>
+                
+                <div class="text-6xl font-black text-blue-600 mb-6">${score}</div>
+
+                <div class="grid grid-cols-2 gap-3 w-full mb-6">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Benar</div>
+                        <div class="text-lg font-bold text-green-600">${correct}</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Salah</div>
+                        <div class="text-lg font-bold text-red-500">${questions.length - correct}</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="btn-nav w-full py-3 uppercase">Kembali</button>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
